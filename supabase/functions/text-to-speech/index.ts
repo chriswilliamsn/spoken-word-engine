@@ -49,9 +49,16 @@ serve(async (req) => {
 
     // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
-    const base64Audio = btoa(
-      String.fromCharCode(...new Uint8Array(arrayBuffer))
-    )
+    const uint8Array = new Uint8Array(arrayBuffer)
+    
+    // Process in chunks to avoid "Maximum call stack size exceeded"
+    let binary = '';
+    const chunkSize = 32768; // 32KB chunks
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const base64Audio = btoa(binary)
 
     console.log(`Successfully generated ${arrayBuffer.byteLength} bytes of audio`)
 
