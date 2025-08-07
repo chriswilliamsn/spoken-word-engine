@@ -2,39 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* AI SaaS Design System - Modern tech aesthetic with gradients and animations */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 222 14% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 222 14% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 222 14% 8%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 263 70% 50%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 263 70% 60%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 222 14% 12%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 222 14% 12%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 263 70% 50%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 222 14% 15%;
+    --input: 222 14% 15%;
+    --ring: 263 70% 50%;
+
+    /* Custom AI Theme Colors */
+    --ai-primary: 263 70% 50%;
+    --ai-secondary: 250 70% 55%;
+    --ai-accent: 280 65% 60%;
+    --ai-surface: 222 14% 10%;
+    --ai-surface-elevated: 222 14% 12%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--ai-primary)), hsl(var(--ai-secondary)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--ai-secondary)), hsl(var(--ai-accent)));
+    --gradient-surface: linear-gradient(135deg, hsl(var(--ai-surface)), hsl(var(--ai-surface-elevated)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(var(--ai-surface)));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(var(--ai-primary) / 0.3);
+    --shadow-card: 0 10px 30px -10px hsl(var(--ai-primary) / 0.2);
+    --shadow-elevated: 0 20px 40px -15px hsl(var(--ai-primary) / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.5rem;
 
