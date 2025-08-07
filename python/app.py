@@ -59,10 +59,28 @@ async def load_model():
     global model
     try:
         logger.info("Loading Dia model...")
-        model = Dia.from_pretrained("nari-labs/Dia-1.6B-0626")
+        
+        # Try to load model with memory optimization
+        import torch
+        if torch.cuda.is_available():
+            device = torch.device("cuda")
+            logger.info("Using CUDA device")
+        else:
+            device = torch.device("cpu")
+            logger.info("Using CPU device")
+            
+        model = Dia.from_pretrained(
+            "nari-labs/Dia-1.6B-0626",
+            device=device,
+            compute_dtype="float16" if torch.cuda.is_available() else "float32"
+        )
         logger.info("Dia model loaded successfully!")
+        
     except Exception as e:
         logger.error(f"Failed to load Dia model: {e}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         # Don't fail startup, just log the error
         model = None
 

@@ -31,14 +31,14 @@ COPY --chown=appuser:appuser . .
 RUN python3 -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# Install all project dependencies (CPU-only PyTorch)
+# Install dependencies from requirements.txt
 RUN pip install --upgrade pip && \
     pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir -e .[dev]
+    pip install --no-cache-dir -r python/requirements.txt
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+    PYTHONPATH=/app/python
 
 # Expose port for the API server
 ENV HOST="0.0.0.0"

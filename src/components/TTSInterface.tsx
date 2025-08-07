@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const voices = [
+  { id: 'nari', name: 'Nari', description: 'Advanced AI voice using Dia TTS' },
   { id: 'alloy', name: 'Alloy', description: 'Neutral, balanced voice' },
   { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
   { id: 'fable', name: 'Fable', description: 'Warm, expressive voice' },
@@ -20,7 +21,7 @@ const voices = [
 
 export default function TTSInterface() {
   const [text, setText] = useState('');
-  const [selectedVoice, setSelectedVoice] = useState('alloy');
+  const [selectedVoice, setSelectedVoice] = useState('nari');
   const [speed, setSpeed] = useState([1.0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -36,28 +37,56 @@ export default function TTSInterface() {
     setIsGenerating(true);
     
     try {
-      // Use OpenAI TTS for all voices
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text: text.trim(),
-          voice: selectedVoice,
-          speed: speed[0],
-        },
-      });
+      // Use Dia TTS for Nari voice, OpenAI for others
+      if (selectedVoice === 'nari') {
+        const { data, error } = await supabase.functions.invoke('dia-tts', {
+          body: {
+            text: text.trim(),
+            max_tokens: 3072,
+            temperature: 0.7,
+            top_p: 0.9,
+          },
+        });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate speech');
-      }
+        if (error) {
+          throw new Error(error.message || 'Failed to generate speech with Dia TTS');
+        }
 
-      if (data.audioContent) {
-        // Create audio URL from base64 data
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
-          { type: 'audio/mpeg' }
-        );
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        toast.success('Speech generated successfully!');
+        if (data.audio_content) {
+          // Create audio URL from base64 data
+          const audioBlob = new Blob(
+            [Uint8Array.from(atob(data.audio_content), c => c.charCodeAt(0))],
+            { type: 'audio/wav' }
+          );
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+          toast.success('Nari voice generated successfully!');
+        } else {
+          toast.success(`Nari processing: ${data.message}`);
+        }
+      } else {
+        const { data, error } = await supabase.functions.invoke('text-to-speech', {
+          body: {
+            text: text.trim(),
+            voice: selectedVoice,
+            speed: speed[0],
+          },
+        });
+
+        if (error) {
+          throw new Error(error.message || 'Failed to generate speech');
+        }
+
+        if (data.audioContent) {
+          // Create audio URL from base64 data
+          const audioBlob = new Blob(
+            [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+            { type: 'audio/mpeg' }
+          );
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+          toast.success('Speech generated successfully!');
+        }
       }
     } catch (error) {
       console.error('TTS error:', error);

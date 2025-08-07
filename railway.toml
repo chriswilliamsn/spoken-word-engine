@@ -10,6 +10,6 @@ restartPolicyMaxRetries = 3
 
 [variables]
 PYTHONUNBUFFERED = "1"
-PYTHONPATH = "/app"
+PYTHONPATH = "/app/python"
 HOST = "0.0.0.0"
 PORT = "$PORT"
