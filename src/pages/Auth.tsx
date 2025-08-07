@@ -29,9 +29,13 @@ const Auth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Redirect authenticated users to home
+        // Redirect authenticated users to home after a brief delay
         if (session?.user) {
-          navigate("/");
+          toast({
+            title: "Welcome!",
+            description: "Successfully authenticated. Redirecting to home...",
+          });
+          setTimeout(() => navigate("/"), 2000);
         }
       }
     );
@@ -43,7 +47,11 @@ const Auth = () => {
       
       // Redirect if already authenticated
       if (session?.user) {
-        navigate("/");
+        toast({
+          title: "Already signed in",
+          description: "Redirecting to home...",
+        });
+        setTimeout(() => navigate("/"), 1000);
       }
     });
 
