@@ -16,6 +16,7 @@ const voices = [
   { id: 'onyx', name: 'Onyx', description: 'Deep, rich voice' },
   { id: 'nova', name: 'Nova', description: 'Bright, energetic voice' },
   { id: 'shimmer', name: 'Shimmer', description: 'Soft, gentle voice' },
+  { id: 'nari', name: 'Nari', description: 'Advanced AI voice using Dia TTS' },
 ];
 
 export default function TTSInterface() {
@@ -36,27 +37,46 @@ export default function TTSInterface() {
     setIsGenerating(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text: text.trim(),
-          voice: selectedVoice,
-          speed: speed[0],
-        },
-      });
+      // Use Dia TTS for Nari voice, OpenAI for others
+      if (selectedVoice === 'nari') {
+        const { data, error } = await supabase.functions.invoke('dia-tts', {
+          body: {
+            text: text.trim(),
+          },
+        });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate speech');
-      }
+        if (error) {
+          throw new Error(error.message || 'Failed to generate speech with Dia TTS');
+        }
 
-      if (data.audioContent) {
-        // Create audio URL from base64 data
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
-          { type: 'audio/mpeg' }
-        );
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        toast.success('Speech generated successfully!');
+        // For now, this is a simulation - show success message
+        toast.success(`Nari voice simulation: "${text.trim()}"`);
+        
+        // TODO: Replace with actual audio blob when Dia TTS is fully integrated
+        setAudioUrl(null);
+      } else {
+        const { data, error } = await supabase.functions.invoke('text-to-speech', {
+          body: {
+            text: text.trim(),
+            voice: selectedVoice,
+            speed: speed[0],
+          },
+        });
+
+        if (error) {
+          throw new Error(error.message || 'Failed to generate speech');
+        }
+
+        if (data.audioContent) {
+          // Create audio URL from base64 data
+          const audioBlob = new Blob(
+            [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+            { type: 'audio/mpeg' }
+          );
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+          toast.success('Speech generated successfully!');
+        }
       }
     } catch (error) {
       console.error('TTS error:', error);

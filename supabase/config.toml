@@ -45,3 +45,6 @@ port = 54329
 
 [functions.text-to-speech]
 verify_jwt = false
+
+[functions.dia-tts]
+verify_jwt = false
