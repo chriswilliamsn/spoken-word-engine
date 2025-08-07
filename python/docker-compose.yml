@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  dia-tts-cpu:
+    build:
+      context: ..
+      dockerfile: Dockerfile.cpu
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - PYTHONPATH=/app
+    volumes:
+      - ./outputs:/app/outputs
+    restart: unless-stopped
+    
+  dia-tts-gpu:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gpu
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - PYTHONPATH=/app
+      - USE_GPU=true
+    volumes:
+      - ./outputs:/app/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

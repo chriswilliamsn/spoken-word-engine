@@ -41,9 +41,10 @@ ENV PYTHONUNBUFFERED=1 \
     USE_GPU=true \
     LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-12.1/lib64:${LD_LIBRARY_PATH}
 
-# Expose Gradio default port
-ENV GRADIO_SERVER_NAME="0.0.0.0"
-EXPOSE 7860
+# Expose port for the API server
+ENV HOST="0.0.0.0"
+ENV PORT="8000"
+EXPOSE 8000
 
-# Entrypoint
-CMD ["python3", "app.py"]
+# Entrypoint - run the Dia TTS server
+CMD ["python3", "python/app.py"]

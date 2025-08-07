@@ -40,9 +40,10 @@ RUN pip install --upgrade pip && \
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
-# Expose Gradio default port
-ENV GRADIO_SERVER_NAME="0.0.0.0"
-EXPOSE 7860
+# Expose port for the API server
+ENV HOST="0.0.0.0"
+ENV PORT="8000"
+EXPOSE 8000
 
-# Entrypoint
-CMD ["python3", "app.py"]
+# Entrypoint - run the Dia TTS server
+CMD ["python3", "python/app.py"]

@@ -42,6 +42,9 @@ export default function TTSInterface() {
         const { data, error } = await supabase.functions.invoke('dia-tts', {
           body: {
             text: text.trim(),
+            max_tokens: 3072,
+            temperature: 0.7,
+            top_p: 0.9,
           },
         });
 
@@ -49,11 +52,18 @@ export default function TTSInterface() {
           throw new Error(error.message || 'Failed to generate speech with Dia TTS');
         }
 
-        // For now, this is a simulation - show success message
-        toast.success(`Nari voice simulation: "${text.trim()}"`);
-        
-        // TODO: Replace with actual audio blob when Dia TTS is fully integrated
-        setAudioUrl(null);
+        if (data.audioContent) {
+          // Create audio URL from base64 data
+          const audioBlob = new Blob(
+            [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+            { type: 'audio/wav' }
+          );
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+          toast.success('Nari voice generated successfully!');
+        } else {
+          toast.success(`Nari processing: ${data.message}`);
+        }
       } else {
         const { data, error } = await supabase.functions.invoke('text-to-speech', {
           body: {

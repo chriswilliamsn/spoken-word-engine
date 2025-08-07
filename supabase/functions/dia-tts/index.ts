@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json()
+    const { text, max_tokens, temperature, top_p } = await req.json()
 
     if (!text) {
       throw new Error('Text is required')
@@ -20,22 +20,36 @@ serve(async (req) => {
 
     console.log('Generating audio with Dia TTS for text:', text)
 
-    // For now, we'll simulate the Dia TTS response
-    // In a real implementation, you'd need to set up the Python environment
-    // and run the Dia model server, then call it from here
+    // Get the Dia TTS server URL from environment
+    const DIA_SERVER_URL = Deno.env.get('DIA_SERVER_URL') || 'http://localhost:8000'
     
-    // This is a placeholder that returns a simple response
-    // indicating that Dia TTS would be used
-    const mockAudioResponse = {
-      message: `Dia TTS would generate audio for: "${text}"`,
-      model: 'nari-labs/Dia-1.6B-0626',
-      status: 'simulated'
+    // Call the Python Dia TTS server
+    const response = await fetch(`${DIA_SERVER_URL}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: text.trim(),
+        max_tokens: max_tokens || 3072,
+        temperature: temperature || 0.7,
+        top_p: top_p || 0.9,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new Error(`Dia TTS server error: ${errorData.detail || response.statusText}`)
     }
 
-    console.log('Dia TTS simulation complete')
+    const data = await response.json()
+    console.log('Dia TTS generation complete')
 
     return new Response(
-      JSON.stringify(mockAudioResponse),
+      JSON.stringify({
+        audioContent: data.audio_content,
+        message: data.message,
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
@@ -45,7 +59,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        status: 400,
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
     )
