@@ -1,0 +1,8 @@
+# Navigate to python directory
+cd python
+
+# Run with CPU
+docker-compose up dia-tts-cpu
+
+# OR run with GPU
+docker-compose up dia-tts-gpu
