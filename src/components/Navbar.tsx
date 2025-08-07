@@ -16,7 +16,7 @@ const Navbar = () => {
           <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </a>
-          <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+          <a href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
             About
           </a>
         </div>
