@@ -13,6 +13,9 @@ const Navbar = () => {
           <a href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
             Features
           </a>
+          <a href="/tts" className="text-muted-foreground hover:text-foreground transition-colors">
+            TTS Demo
+          </a>
           <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </a>
