@@ -49,7 +49,32 @@ export default function TTSInterface() {
         });
 
         if (error) {
-          throw new Error(error.message || 'Failed to generate speech with Dia TTS');
+          console.warn('Dia TTS failed, falling back to OpenAI:', error.message);
+          toast.error('Nari voice unavailable, switching to Alloy voice');
+          
+          // Fallback to OpenAI TTS
+          const fallbackData = await supabase.functions.invoke('text-to-speech', {
+            body: {
+              text: text.trim(),
+              voice: 'alloy',
+              speed: speed[0],
+            },
+          });
+
+          if (fallbackData.error) {
+            throw new Error(fallbackData.error.message || 'Failed to generate speech');
+          }
+
+          if (fallbackData.data?.audioContent) {
+            const audioBlob = new Blob(
+              [Uint8Array.from(atob(fallbackData.data.audioContent), c => c.charCodeAt(0))],
+              { type: 'audio/mpeg' }
+            );
+            const url = URL.createObjectURL(audioBlob);
+            setAudioUrl(url);
+            toast.success('Speech generated with fallback voice!');
+          }
+          return;
         }
 
         if (data.audio_content) {
