@@ -39,7 +39,7 @@ const HeroSection = () => {
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" className="flex-1 group">
+              <Button variant="hero" className="flex-1 group" onClick={() => window.location.href = '/auth'}>
                 <Play className="mr-2 group-hover:scale-110 transition-transform" />
                 Generate Speech
               </Button>
@@ -51,7 +51,7 @@ const HeroSection = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="hero" size="lg" className="animate-float">
+            <Button variant="hero" size="lg" className="animate-float" onClick={() => window.location.href = '/auth'}>
               Start Free Trial
             </Button>
             <Button variant="outline-glow" size="lg">
