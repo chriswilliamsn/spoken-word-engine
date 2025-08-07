@@ -12,7 +12,26 @@ serve(async (req) => {
   }
 
   try {
-    const { text, max_tokens, temperature, top_p } = await req.json()
+    // Parse the request body with error handling
+    let requestBody;
+    try {
+      const rawBody = await req.text();
+      if (!rawBody || rawBody.trim() === '') {
+        throw new Error('Request body is empty');
+      }
+      requestBody = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    const { text, max_tokens, temperature, top_p } = requestBody;
 
     if (!text) {
       throw new Error('Text is required')
