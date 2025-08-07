@@ -23,7 +23,32 @@ serve(async (req) => {
     // Get the Dia TTS server URL from environment
     const DIA_SERVER_URL = Deno.env.get('DIA_SERVER_URL') || 'http://localhost:8000'
     
+    // First check if the server is healthy
+    console.log(`Checking health of Dia server at: ${DIA_SERVER_URL}`)
+    
+    try {
+      const healthResponse = await fetch(`${DIA_SERVER_URL}/health`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      
+      if (!healthResponse.ok) {
+        throw new Error(`Health check failed: ${healthResponse.status} ${healthResponse.statusText}`)
+      }
+      
+      const healthData = await healthResponse.json()
+      console.log('Health check response:', healthData)
+      
+      if (!healthData.model_loaded) {
+        throw new Error('Dia model is not loaded on the server')
+      }
+    } catch (healthError) {
+      console.error('Health check failed:', healthError)
+      throw new Error(`Dia server is not available: ${healthError.message}`)
+    }
+
     // Call the Python Dia TTS server
+    console.log(`Calling Dia TTS server at: ${DIA_SERVER_URL}/generate`)
     const response = await fetch(`${DIA_SERVER_URL}/generate`, {
       method: 'POST',
       headers: {
