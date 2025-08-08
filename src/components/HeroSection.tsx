@@ -149,7 +149,7 @@ const HeroSection = () => {
             <div className="bg-ai-surface rounded-lg p-4 mb-4">
               <textarea 
                 ref={textRef}
-                className="w-full bg-transparent text-foreground placeholder-muted-foreground resize-none border-none outline-none"
+                className="w-full bg-transparent text-foreground placeholder-muted-foreground resize-none border-none outline-none text-center placeholder:text-center"
                 rows={3}
                 placeholder="Enter your text here to convert to speech..."
                 defaultValue="Welcome to VoiceAI, where cutting-edge technology meets natural human expression."
