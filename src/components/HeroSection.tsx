@@ -28,7 +28,6 @@ const HeroSection = () => {
     }
 
     toast({
-      title: "Welcome Preview for Flow Voice Text-to-Speech",
       description:
         "Welcome to Flow Voice!\n\nExperience the future of text-to-speech technology with Flow Voice, the leading realistic voice model on the market. Our state-of-the-art system uses advanced AI algorithms to deliver natural-sounding speech that captures the nuances of human emotion and tone.\n\nKey Features:\n• High Fidelity Sound: Enjoy crystal-clear audio that makes every word resonate.\n• Natural Intonation: Flow Voice mimics the rhythm and inflection of human speech, making your content engaging and relatable.\n• Customizable Voices: Choose from a diverse range of voices and accents to suit your needs.\n• User-Friendly Interface: Effortlessly convert text to speech with our intuitive platform.\n\nApplications:\n• E-Learning: Enhance your educational content with lifelike narration.\n• Audiobooks: Bring your stories to life with expressive reading.\n• Accessibility: Provide a voice for those who need assistance with reading.\n\nJoin the revolution in voice technology and bring your text to life with Flow Voice. Start your journey today and experience the difference!",
       duration: 10000,
