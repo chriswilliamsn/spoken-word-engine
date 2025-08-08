@@ -14,7 +14,9 @@ const HeroSection = () => {
 
   const handlePreview = async () => {
     const previewText =
-      "Welcome to Flow Voice — a quick preview of our natural, expressive TTS. Hear a short sample now.";
+      (textRef.current?.value && textRef.current.value.trim().length > 0)
+        ? textRef.current.value
+        : "Welcome to VoiceAI, where cutting-edge technology meets natural human expression.";
 
     // Stop any ongoing playback first
     if (audioRef.current) {
