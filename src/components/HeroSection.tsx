@@ -4,53 +4,16 @@ import { useToast } from "@/hooks/use-toast";
 import heroBackground from "@/assets/hero-background.jpg";
 import { useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ToastAction } from "@/components/ui/toast";
 
 const HeroSection = () => {
   const { toast } = useToast();
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const handlePreview = async () => {
     const previewText =
-      (textRef.current?.value && textRef.current.value.trim().length > 0)
-        ? textRef.current.value
-        : "Welcome to VoiceAI, where cutting-edge technology meets natural human expression.";
+      "Welcome to Flow Voice!\n\nExperience the future of text-to-speech technology with Flow Voice, the leading realistic voice model on the market. Our state-of-the-art system uses advanced AI algorithms to deliver natural-sounding speech that captures the nuances of human emotion and tone.\n\nKey Features:\n• High Fidelity Sound: Enjoy crystal-clear audio that makes every word resonate.\n• Natural Intonation: Flow Voice mimics the rhythm and inflection of human speech, making your content engaging and relatable.\n• Customizable Voices: Choose from a diverse range of voices and accents to suit your needs.\n• User-Friendly Interface: Effortlessly convert text to speech with our intuitive platform.\n\nApplications:\n• E-Learning: Enhance your educational content with lifelike narration.\n• Audiobooks: Bring your stories to life with expressive reading.\n• Accessibility: Provide a voice for those who need assistance with reading.\n\nJoin the revolution in voice technology and bring your text to life with Flow Voice. Start your journey today and experience the difference!";
 
-    // Stop any ongoing playback first
-    if (audioRef.current) {
-      try { audioRef.current.pause(); } catch {}
-      audioRef.current = null;
-    }
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try { window.speechSynthesis.cancel(); } catch {}
-      utteranceRef.current = null;
-    }
-
-    let dismissToast: () => void = () => {};
-    const stopPlayback = () => {
-      try { audioRef.current?.pause(); } catch {}
-      audioRef.current = null;
-      try { if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel(); } catch {}
-      utteranceRef.current = null;
-      dismissToast();
-    };
-
-    // Create a persistent toast with a Stop action; we'll dismiss when audio ends
-    ({ dismiss: dismissToast } = toast({
-      description: previewText,
-      duration: 3600000,
-      action: (
-        <ToastAction altText="Stop playback" onClick={stopPlayback}>
-          Stop
-        </ToastAction>
-      ),
-    }));
-
-    let spoke = false;
-
-    // 1) Try Nari (Dia TTS)
+    // Generate and play audio with Nari (Dia TTS). Falls back silently if unavailable.
     try {
       const { data, error } = await supabase.functions.invoke('dia-tts', {
         body: {
@@ -62,64 +25,21 @@ const HeroSection = () => {
       });
       if (!error && data?.audio_content) {
         const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audio_content), (c) => c.charCodeAt(0))],
+          [Uint8Array.from(atob(data.audio_content), c => c.charCodeAt(0))],
           { type: 'audio/wav' }
         );
         const url = URL.createObjectURL(audioBlob);
         const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.onended = () => dismissToast();
-        await audio.play();
-        spoke = true;
+        audio.play();
       }
     } catch (_) {
-      // continue to fallback
+      // no-op if TTS generation fails
     }
 
-    // 2) Fallback to OpenAI TTS if Nari unavailable
-    if (!spoke) {
-      try {
-        const { data, error } = await supabase.functions.invoke('text-to-speech', {
-          body: {
-            text: previewText,
-            voice: 'alloy',
-            speed: 1,
-          },
-        });
-        if (!error && data?.audioContent) {
-          const audioBlob = new Blob(
-            [Uint8Array.from(atob(data.audioContent), (c) => c.charCodeAt(0))],
-            { type: 'audio/mpeg' }
-          );
-          const url = URL.createObjectURL(audioBlob);
-          const audio = new Audio(url);
-          audioRef.current = audio;
-          audio.onended = () => dismissToast();
-          await audio.play();
-          spoke = true;
-        }
-      } catch (_) {
-        // continue to browser TTS
-      }
-    }
-
-    // 3) Final fallback: Browser SpeechSynthesis
-    if (!spoke && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        const synth = window.speechSynthesis;
-        synth.cancel();
-        const utterance = new SpeechSynthesisUtterance(previewText);
-        utteranceRef.current = utterance;
-        utterance.rate = 1;
-        utterance.pitch = 1;
-        utterance.lang = 'en-US';
-        utterance.onend = () => dismissToast();
-        synth.speak(utterance);
-        spoke = true;
-      } catch (_) {
-        // swallow
-      }
-    }
+    toast({
+      description: previewText,
+      duration: 10000,
+    });
   };
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -151,7 +71,7 @@ const HeroSection = () => {
             <div className="bg-ai-surface rounded-lg p-4 mb-4">
               <textarea 
                 ref={textRef}
-                className="w-full bg-transparent text-foreground placeholder-muted-foreground resize-none border-none outline-none text-center placeholder:text-center"
+                className="w-full bg-transparent text-foreground placeholder-muted-foreground resize-none border-none outline-none"
                 rows={3}
                 placeholder="Enter your text here to convert to speech..."
                 defaultValue="Welcome to VoiceAI, where cutting-edge technology meets natural human expression."
