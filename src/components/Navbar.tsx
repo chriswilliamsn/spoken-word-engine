@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -20,18 +22,21 @@ const Navbar = () => {
             try {
               const { data: profile } = await supabase
                 .from("profiles")
-                .select("display_name")
+                .select("display_name, avatar_url")
                 .eq("user_id", user.id)
                 .maybeSingle();
               if (!isMounted) return;
               setDisplayName(profile?.display_name || fallback);
+              setAvatarUrl(profile?.avatar_url || null);
             } catch {
               if (!isMounted) return;
               setDisplayName(fallback);
+              setAvatarUrl(null);
             }
           }, 0);
         } else {
           setDisplayName(null);
+          setAvatarUrl(null);
         }
       });
 
@@ -43,11 +48,12 @@ const Navbar = () => {
         try {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("display_name")
+            .select("display_name, avatar_url")
             .eq("user_id", user.id)
             .maybeSingle();
           if (!isMounted) return;
           setDisplayName(profile?.display_name || fallback);
+          setAvatarUrl(profile?.avatar_url || null);
         } catch {
           if (!isMounted) return;
           setDisplayName(fallback);
@@ -91,7 +97,13 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           {displayName ? (
             <Button variant="ghost" size="sm" onClick={() => (window.location.href = "/profile")}> 
-              {displayName}
+              <span className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={avatarUrl || undefined} alt={displayName || "User"} />
+                  <AvatarFallback>{(displayName || "U").slice(0,1).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span>{displayName}</span>
+              </span>
             </Button>
           ) : (
             <Button variant="ghost" size="sm" onClick={() => (window.location.href = "/auth")}> 
