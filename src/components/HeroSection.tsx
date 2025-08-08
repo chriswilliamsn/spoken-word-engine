@@ -1,23 +1,47 @@
 import { Button } from "@/components/ui/button";
-import { Play, Volume2 } from "lucide-react";
+import { Play, Volume2, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import heroBackground from "@/assets/hero-background.jpg";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const { toast } = useToast();
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speechUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const stopSpeech = () => {
+    if (speechUtteranceRef.current && speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
 
   const handlePreview = async () => {
-    const previewText =
-      "Welcome to Flow Voice!\n\nExperience the future of text-to-speech technology with Flow Voice, the leading realistic voice model on the market. Our state-of-the-art system uses advanced AI algorithms to deliver natural-sounding speech that captures the nuances of human emotion and tone.\n\nKey Features:\n• High Fidelity Sound: Enjoy crystal-clear audio that makes every word resonate.\n• Natural Intonation: Flow Voice mimics the rhythm and inflection of human speech, making your content engaging and relatable.\n• Customizable Voices: Choose from a diverse range of voices and accents to suit your needs.\n• User-Friendly Interface: Effortlessly convert text to speech with our intuitive platform.\n\nApplications:\n• E-Learning: Enhance your educational content with lifelike narration.\n• Audiobooks: Bring your stories to life with expressive reading.\n• Accessibility: Provide a voice for those who need assistance with reading.\n\nJoin the revolution in voice technology and bring your text to life with Flow Voice. Start your journey today and experience the difference!";
+    const textToRead = textRef.current?.value || "Welcome to VoiceAI, where cutting-edge technology meets natural human expression.";
+    
+    // Stop any current speech
+    stopSpeech();
+
+    // Start speech synthesis and show toast with stop button
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(textToRead);
+      speechUtteranceRef.current = utterance;
+      
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      speechSynthesis.speak(utterance);
+      setIsSpeaking(true); // Set immediately for the toast
+    }
 
     // Generate and play audio with Nari (Dia TTS). Falls back silently if unavailable.
     try {
       const { data, error } = await supabase.functions.invoke('dia-tts', {
         body: {
-          text: previewText,
+          text: textToRead,
           max_tokens: 3072,
           temperature: 0.7,
           top_p: 0.9,
@@ -37,8 +61,14 @@ const HeroSection = () => {
     }
 
     toast({
-      description: previewText,
+      description: textToRead,
       duration: 10000,
+      action: (
+        <Button variant="outline" size="sm" onClick={stopSpeech}>
+          <Square className="h-4 w-4 mr-1" />
+          Stop
+        </Button>
+      ),
     });
   };
   return (
