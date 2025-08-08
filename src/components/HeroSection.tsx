@@ -13,6 +13,12 @@ const HeroSection = () => {
     const previewText =
       "Welcome to Flow Voice!\n\nExperience the future of text-to-speech technology with Flow Voice, the leading realistic voice model on the market. Our state-of-the-art system uses advanced AI algorithms to deliver natural-sounding speech that captures the nuances of human emotion and tone.\n\nKey Features:\n• High Fidelity Sound: Enjoy crystal-clear audio that makes every word resonate.\n• Natural Intonation: Flow Voice mimics the rhythm and inflection of human speech, making your content engaging and relatable.\n• Customizable Voices: Choose from a diverse range of voices and accents to suit your needs.\n• User-Friendly Interface: Effortlessly convert text to speech with our intuitive platform.\n\nApplications:\n• E-Learning: Enhance your educational content with lifelike narration.\n• Audiobooks: Bring your stories to life with expressive reading.\n• Accessibility: Provide a voice for those who need assistance with reading.\n\nJoin the revolution in voice technology and bring your text to life with Flow Voice. Start your journey today and experience the difference!";
 
+    // Create a persistent toast and dismiss it when audio ends
+    const { dismiss: dismissToast } = toast({
+      description: previewText,
+      duration: 3600000, // keep visible ~1 hour, we'll dismiss on end
+    });
+
     let spoke = false;
 
     // 1) Try Nari (Dia TTS)
@@ -32,6 +38,7 @@ const HeroSection = () => {
         );
         const url = URL.createObjectURL(audioBlob);
         const audio = new Audio(url);
+        audio.onended = () => dismissToast();
         await audio.play();
         spoke = true;
       }
@@ -56,6 +63,7 @@ const HeroSection = () => {
           );
           const url = URL.createObjectURL(audioBlob);
           const audio = new Audio(url);
+          audio.onended = () => dismissToast();
           await audio.play();
           spoke = true;
         }
@@ -73,16 +81,13 @@ const HeroSection = () => {
         utterance.rate = 1;
         utterance.pitch = 1;
         utterance.lang = 'en-US';
+        utterance.onend = () => dismissToast();
         synth.speak(utterance);
+        spoke = true;
       } catch (_) {
         // swallow
       }
     }
-
-    toast({
-      description: previewText,
-      duration: 10000,
-    });
   };
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
