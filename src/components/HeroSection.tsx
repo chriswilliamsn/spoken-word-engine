@@ -46,63 +46,8 @@ const HeroSection = () => {
       ),
     }));
 
-    let spoke = false;
-
-    // 1) Try Nari (Dia TTS)
-    try {
-      const { data, error } = await supabase.functions.invoke('dia-tts', {
-        body: {
-          text: previewText,
-          max_tokens: 3072,
-          temperature: 0.7,
-          top_p: 0.9,
-        },
-      });
-      if (!error && data?.audio_content) {
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audio_content), (c) => c.charCodeAt(0))],
-          { type: 'audio/wav' }
-        );
-        const url = URL.createObjectURL(audioBlob);
-        const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.onended = () => dismissToast();
-        await audio.play();
-        spoke = true;
-      }
-    } catch (_) {
-      // continue to fallback
-    }
-
-    // 2) Fallback to OpenAI TTS if Nari unavailable
-    if (!spoke) {
-      try {
-        const { data, error } = await supabase.functions.invoke('text-to-speech', {
-          body: {
-            text: previewText,
-            voice: 'alloy',
-            speed: 1,
-          },
-        });
-        if (!error && data?.audioContent) {
-          const audioBlob = new Blob(
-            [Uint8Array.from(atob(data.audioContent), (c) => c.charCodeAt(0))],
-            { type: 'audio/mpeg' }
-          );
-          const url = URL.createObjectURL(audioBlob);
-          const audio = new Audio(url);
-          audioRef.current = audio;
-          audio.onended = () => dismissToast();
-          await audio.play();
-          spoke = true;
-        }
-      } catch (_) {
-        // continue to browser TTS
-      }
-    }
-
-    // 3) Final fallback: Browser SpeechSynthesis
-    if (!spoke && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    // Start browser speech immediately for instant response
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         const synth = window.speechSynthesis;
         synth.cancel();
@@ -113,10 +58,45 @@ const HeroSection = () => {
         utterance.lang = 'en-US';
         utterance.onend = () => dismissToast();
         synth.speak(utterance);
-        spoke = true;
+        
+        // Try to upgrade to higher quality audio in parallel
+        (async () => {
+          try {
+            // Try OpenAI TTS first (skip Nari since it's consistently failing)
+            const { data, error } = await supabase.functions.invoke('text-to-speech', {
+              body: {
+                text: previewText,
+                voice: 'alloy',
+                speed: 1,
+              },
+            });
+            
+            if (!error && data?.audioContent) {
+              // Stop browser synthesis and switch to high-quality audio
+              synth.cancel();
+              utteranceRef.current = null;
+              
+              const audioBlob = new Blob(
+                [Uint8Array.from(atob(data.audioContent), (c) => c.charCodeAt(0))],
+                { type: 'audio/mpeg' }
+              );
+              const url = URL.createObjectURL(audioBlob);
+              const audio = new Audio(url);
+              audioRef.current = audio;
+              audio.onended = () => dismissToast();
+              await audio.play();
+            }
+          } catch (_) {
+            // If upgrade fails, continue with browser synthesis
+          }
+        })();
       } catch (_) {
-        // swallow
+        // If browser synthesis fails, dismiss toast
+        dismissToast();
       }
+    } else {
+      // No browser synthesis support, dismiss toast
+      dismissToast();
     }
   };
   return (
