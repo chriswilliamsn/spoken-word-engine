@@ -37,14 +37,15 @@ serve(async (req) => {
 
     console.log(`Generating audio with Hugging Face API for text: ${text}`);
 
-    // Use Hugging Face Inference API directly
+    // Use a TTS model available via HF Inference API
     const hfToken = Deno.env.get('HUGGING_FACE_TOKEN');
     if (!hfToken) {
       throw new Error('Hugging Face token not configured');
     }
 
+    // Using Microsoft SpeechT5 TTS model which is available via Inference API
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/nari-labs/Dia-1.6B-0626',
+      'https://api-inference.huggingface.co/models/microsoft/speecht5_tts',
       {
         method: 'POST',
         headers: {
@@ -53,11 +54,6 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           inputs: text,
-          parameters: {
-            max_tokens: max_tokens || 3072,
-            temperature: temperature || 0.7,
-            top_p: top_p || 0.9,
-          }
         }),
       }
     );

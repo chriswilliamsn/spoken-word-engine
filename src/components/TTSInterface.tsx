@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const voices = [
-  { id: 'nari', name: 'Nari', description: 'Advanced AI voice using Dia TTS' },
+  { id: 'nari', name: 'Nari', description: 'Advanced AI voice using SpeechT5 TTS' },
   { id: 'alloy', name: 'Alloy', description: 'Neutral, balanced voice' },
   { id: 'echo', name: 'Echo', description: 'Clear, articulate voice' },
   { id: 'fable', name: 'Fable', description: 'Warm, expressive voice' },
