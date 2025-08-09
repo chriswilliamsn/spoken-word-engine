@@ -27,7 +27,8 @@ def load_dia_model():
         model = Dia.from_pretrained(
             "nari-labs/Dia-1.6B-0626",
             device=device,
-            compute_dtype=compute_dtype
+            compute_dtype=compute_dtype,
+            load_dac=True
         )
         logger.info(f"Dia model loaded successfully on {device}")
         return True

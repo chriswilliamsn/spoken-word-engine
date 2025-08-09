@@ -6,8 +6,8 @@ colorTo: purple
 sdk: docker
 pinned: false
 license: mit
-suggested_hardware: t4-small
-suggested_storage: small
+suggested_hardware: a10g-small
+suggested_storage: large
 ---
 
 # Dia TTS - Nari Voice Generator
