@@ -39,7 +39,7 @@ export default function TTSInterface() {
     try {
       // Use Dia TTS for Nari voice, OpenAI for others
       if (selectedVoice === 'nari') {
-        const { data, error } = await supabase.functions.invoke('dia-tts', {
+        const { data, error } = await supabase.functions.invoke('dia-hf-direct', {
           body: {
             text: text.trim(),
             max_tokens: 3072,
@@ -49,7 +49,7 @@ export default function TTSInterface() {
         });
 
         if (error) {
-          console.warn('Dia TTS failed, falling back to OpenAI:', error.message);
+          console.warn('Dia HF Direct failed, falling back to OpenAI:', error.message);
           toast.error('Nari voice unavailable, switching to Alloy voice');
           
           // Fallback to OpenAI TTS
